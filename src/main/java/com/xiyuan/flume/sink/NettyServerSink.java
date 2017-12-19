@@ -31,14 +31,15 @@ public class NettyServerSink extends AbstractSink implements Configurable {
 
     private int batchSize;
 
-
+    private long transactionTime;
 
     @Override
     public void configure(Context context) {
         host = context.getString("host", "0.0.0.0");
         port = context.getInteger("port", 9090);
         users = context.getString("users", "user_default");
-        this.batchSize = context.getInteger("batchSize", 128);
+        batchSize = context.getInteger("batchSize", 128);
+        transactionTime = context.getLong("transactionTime", 5000L);
     }
 
     @Override
@@ -56,6 +57,8 @@ public class NettyServerSink extends AbstractSink implements Configurable {
         nettyServer.shutdown();
     }
 
+    private long lastTranscationCommitTime = System.currentTimeMillis();
+
     @Override
     public Status process() throws EventDeliveryException {
         Status status = Status.READY;
@@ -66,7 +69,7 @@ public class NettyServerSink extends AbstractSink implements Configurable {
             List<Event> batch = Lists.newLinkedList();
 
             int size;
-            for(size = 0; size < this.batchSize; ++size) {
+            for(size = 0; size < this.batchSize && System.currentTimeMillis() - lastTranscationCommitTime < transactionTime; ++size) {
                 Event event = channel.take();
                 if (event == null) {
                     break;
@@ -91,6 +94,7 @@ public class NettyServerSink extends AbstractSink implements Configurable {
             }
 
             transaction.commit();
+            lastTranscationCommitTime = System.currentTimeMillis();
             this.sinkCounter.addToEventDrainSuccessCount((long)size);
         } catch (Throwable var10) {
             transaction.rollback();
