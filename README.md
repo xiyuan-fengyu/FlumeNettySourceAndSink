@@ -35,6 +35,7 @@ producer.channels.c1.transactionCapacity = 128
 
 #具体定义sink
 producer.sinks.k1.type =com.xiyuan.flume.sink.NettyServerSink
+#producer.sinks.k1.transactionTime=5000
 producer.sinks.k1.host = 0.0.0.0
 producer.sinks.k1.port = 9090
 #producer.sinks.k1.users = user_default,user_test
