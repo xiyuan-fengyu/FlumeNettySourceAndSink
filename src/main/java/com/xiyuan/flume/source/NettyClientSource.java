@@ -58,6 +58,7 @@ public class NettyClientSource extends AbstractSource implements EventDrivenSour
         List<Event> events = new ArrayList<>();
         for (ByteBuffer buffer : dataPack.getDatas()) {
             events.add(HeaderAndBodySerialization.deserialize(buffer));
+            logger.info(events.get(events.size() - 1).toString());
         }
         appendBatch(events);
     }

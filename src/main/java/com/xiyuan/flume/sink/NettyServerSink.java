@@ -6,6 +6,8 @@ import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.instrumentation.SinkCounter;
 import org.apache.flume.sink.AbstractSink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,7 +19,7 @@ import java.util.List;
  */
 public class NettyServerSink extends AbstractSink implements Configurable {
 
-//    private final Logger logger = LoggerFactory.getLogger(NettyServerSink.class);
+    private final Logger logger = LoggerFactory.getLogger(NettyServerSink.class);
 
     private String host;
 
@@ -48,6 +50,7 @@ public class NettyServerSink extends AbstractSink implements Configurable {
         this.sinkCounter = new SinkCounter(this.getName());
         this.sinkCounter.start();
         super.start();
+        logger.info(NettyServerSink.class.getSimpleName() + " Started");
     }
 
     @Override
@@ -55,6 +58,7 @@ public class NettyServerSink extends AbstractSink implements Configurable {
         super.stop();
         this.sinkCounter.stop();
         nettyServer.shutdown();
+        logger.info(NettyServerSink.class.getSimpleName() + " Stopped");
     }
 
     private long lastTranscationCommitTime = System.currentTimeMillis();
@@ -75,6 +79,7 @@ public class NettyServerSink extends AbstractSink implements Configurable {
                     break;
                 }
 
+//                logger.info(NettyServerSink.class.getSimpleName() + " add event to batch");
                 batch.add(event);
             }
 
@@ -91,6 +96,7 @@ public class NettyServerSink extends AbstractSink implements Configurable {
 
                 this.sinkCounter.addToEventDrainAttemptCount((long)size);
                 sendBatch(batch);
+//                logger.info(NettyServerSink.class.getSimpleName() + " send batch");
             }
 
             transaction.commit();

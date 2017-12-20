@@ -71,6 +71,7 @@ public class NettyServer {
             clients.forEach((client, auth) -> {
                 if (auth) {
                     client.getChannel().write(dataPack);
+//                    logger.info("send dataPack to" + client);
                 }
             });
         }

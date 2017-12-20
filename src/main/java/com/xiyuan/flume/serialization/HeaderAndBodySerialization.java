@@ -23,7 +23,7 @@ public class HeaderAndBodySerialization {
         buffer.putInt(header.length);
         buffer.put(header);
         buffer.put(body);
-        buffer.flip();
+        buffer.flip();//这句话一定不能少，少了消息无法正常发送
         return buffer;
     }
 
