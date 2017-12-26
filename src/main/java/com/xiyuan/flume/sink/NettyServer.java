@@ -101,6 +101,16 @@ public class NettyServer {
 
     private class MyChannelHandler extends SimpleChannelHandler {
 
+        private static final String ping = "__PING__";
+
+        private static final String pong = "__PONG__";
+
+        private NettyTransportCodec.NettyDataPack pongMsg = new NettyTransportCodec.NettyDataPack();
+
+        private MyChannelHandler() {
+            pongMsg.setDatas(Collections.singletonList(ByteBuffer.wrap(pong.getBytes(StandardCharsets.UTF_8))));
+        }
+
         @Override
         public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
             super.channelConnected(ctx, e);
@@ -120,7 +130,10 @@ public class NettyServer {
             NettyTransportCodec.NettyDataPack dataPack = (NettyTransportCodec.NettyDataPack) e.getMessage();
             for (ByteBuffer buffer : dataPack.getDatas()) {
                 String msg = new String(buffer.array(), StandardCharsets.UTF_8);
-                if (msg.startsWith("auth:")) {
+                if (ping.equals(msg)) {
+                    ctx.getChannel().write(pongMsg);
+                }
+                else if (msg.startsWith("auth:")) {
                     if (users.contains(msg.substring(5))) {
                         clients.put(ctx, true);
                         logger.info(String.format("client auth success: %s", e));
